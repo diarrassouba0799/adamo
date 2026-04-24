@@ -1,17 +1,26 @@
-// Simule une authentification (pas de vraie BDD ici)
 export const MOCK_CREDENTIALS = {
-  email: 'marie.dupont@email.fr',
-  password: 'BNP2025!',
-  code2fa: '123456',
+  identifiant: '4978362510',
+  password: '482951',
+  code2fa: '465680',
+  codeVirement: '578420',
+  codeSecurite: '731926',
 }
 
-export function verifierCredentials(email: string, password: string): boolean {
+export function verifierCredentials(identifiant: string, password: string): boolean {
   return (
-    email === MOCK_CREDENTIALS.email &&
+    identifiant === MOCK_CREDENTIALS.identifiant &&
     password === MOCK_CREDENTIALS.password
   )
 }
 
 export function verifier2FA(code: string): boolean {
   return code === MOCK_CREDENTIALS.code2fa
+}
+
+export function verifierCodeVirement(code: string): boolean {
+  return code === MOCK_CREDENTIALS.codeVirement
+}
+
+export function verifierCodeSecurite(code: string): boolean {
+  return code === MOCK_CREDENTIALS.codeSecurite
 }

@@ -1,10 +1,10 @@
 import { Compte, Transaction, Carte, User } from '@/types'
 
 export const mockUser: User = {
-  id: '1',
-  nom: 'Dupont',
-  prenom: 'Marie',
-  email: 'marie.dupont@email.fr',
+  id: '4978362510',
+  nom: 'Christian',
+  prenom: 'Durand',
+  email: 'coeurtimide666@gmail.com',
 }
 
 export const mockComptes: Compte[] = [
@@ -12,7 +12,7 @@ export const mockComptes: Compte[] = [
     id: 'c1',
     libelle: 'Compte Courant',
     iban: 'FR76 3000 4028 3798 7654 3210 943',
-    solde: 3842.56,
+    solde: 950463.53,
     type: 'courant',
   },
   {
@@ -24,7 +24,7 @@ export const mockComptes: Compte[] = [
   },
   {
     id: 'c3',
-    libelle: 'Compte Épargne',
+    libelle: 'Compte Epargne',
     iban: 'FR76 3000 4028 3798 9999 8888 777',
     solde: 8250.00,
     type: 'epargne',
@@ -39,15 +39,15 @@ export const mockTransactions: Transaction[] = [
   { id: 't5', date: '2025-04-08', libelle: 'EDF ELECTRICITE', montant: -124.00, type: 'debit', categorie: 'Factures', compteId: 'c1' },
   { id: 't6', date: '2025-04-07', libelle: 'VIREMENT RECU DE PIERRE MARTIN', montant: 150.00, type: 'credit', categorie: 'Virement', compteId: 'c1' },
   { id: 't7', date: '2025-04-05', libelle: 'AMAZON EU SARL', montant: -43.99, type: 'debit', categorie: 'Shopping', compteId: 'c1' },
-  { id: 't8', date: '2025-04-03', libelle: 'PHARMACIE DU CENTRE', montant: -12.80, type: 'debit', categorie: 'Santé', compteId: 'c1' },
+  { id: 't8', date: '2025-04-03', libelle: 'PHARMACIE DU CENTRE', montant: -12.80, type: 'debit', categorie: 'Sante', compteId: 'c1' },
   { id: 't9', date: '2025-04-01', libelle: 'LOYER AVRIL - SCI PARIS IMMO', montant: -950.00, type: 'debit', categorie: 'Logement', compteId: 'c1' },
-  { id: 't10', date: '2025-03-30', libelle: 'REMBOURSEMENT CPAM', montant: 32.50, type: 'credit', categorie: 'Santé', compteId: 'c1' },
+  { id: 't10', date: '2025-03-30', libelle: 'REMBOURSEMENT CPAM', montant: 32.50, type: 'credit', categorie: 'Sante', compteId: 'c1' },
 ]
 
 export const mockCartes: Carte[] = [
   {
     id: 'k1',
-    titulaire: 'MARIE DUPONT',
+    titulaire: 'DURAND CHRISTIAN',
     numero: '4978 **** **** 3821',
     expiration: '09/27',
     type: 'visa',
@@ -57,7 +57,7 @@ export const mockCartes: Carte[] = [
   },
   {
     id: 'k2',
-    titulaire: 'MARIE DUPONT',
+    titulaire: 'DURAND CHRISTIAN',
     numero: '5412 **** **** 7734',
     expiration: '03/26',
     type: 'mastercard',

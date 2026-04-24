@@ -1,7 +1,10 @@
 'use client'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, ArrowLeftRight, CreditCard, Send, Settings } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import {
+  LayoutDashboard, ArrowLeftRight,
+  CreditCard, Send, Settings
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -16,7 +19,7 @@ export default function MobileNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
       <div className="flex">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
@@ -26,7 +29,7 @@ export default function MobileNav() {
               href={href}
               className={cn(
                 'flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors',
-                active ? 'text-[#009B4E]' : 'text-gray-400'
+                active ? 'text-[#003189]' : 'text-gray-400'
               )}
             >
               <Icon size={20} />

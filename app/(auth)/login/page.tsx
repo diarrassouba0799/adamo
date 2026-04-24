@@ -1,33 +1,149 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react'
+import { Shield, Delete, User } from 'lucide-react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { verifierCredentials, verifier2FA, MOCK_CREDENTIALS } from '@/lib/auth'
 import { mockUser } from '@/lib/data'
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
+
+function ClavierVirtuel({
+  onPress,
+  onDelete,
+}: {
+  onPress: (v: string) => void
+  onDelete: () => void
+}) {
+  const melange = ['7','3','9','1','5','2','8','4','0','6']
+  return (
+    <div className="grid grid-cols-5 gap-2 mt-3">
+      {melange.map((t, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => onPress(t)}
+          className="h-11 rounded-lg border border-gray-200 bg-white text-gray-800 font-semibold text-base hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
+        >
+          {t}
+        </button>
+      ))}
+      <button
+        type="button"
+        onClick={onDelete}
+        className="h-11 col-span-5 rounded-lg border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm"
+      >
+        <Delete size={15} />
+        Effacer
+      </button>
+    </div>
+  )
+}
+
+function IndicateurCode({ longueur, total }: { longueur: number; total: number }) {
+  return (
+    <div className="flex justify-center gap-3 my-4">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className="w-4 h-4 rounded-full border-2 transition-all"
+          style={{
+            background: i < longueur ? '#003189' : 'white',
+            borderColor: i < longueur ? '#003189' : '#d1d5db',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function PanneauDroit() {
+  return (
+    <div
+      className="hidden lg:flex flex-col justify-between p-12 text-white relative overflow-hidden"
+      style={{
+        background: 'linear-gradient(135deg, #003189 0%, #0050c8 50%, #1a6fd4 100%)',
+      }}
+    >
+      {/* Cercles décoratifs */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-10"
+        style={{ background: 'rgba(255,255,255,0.3)' }} />
+      <div className="absolute bottom-20 -left-10 w-48 h-48 rounded-full opacity-10"
+        style={{ background: 'rgba(255,255,255,0.2)' }} />
+
+      <div className="relative z-10">
+        <h2 className="text-3xl font-bold leading-tight mb-3">
+          La Banque Postale,{' '}
+          <span style={{ color: '#7dd3fc' }}>citoyenne</span>
+        </h2>
+        <p className="text-blue-100 text-sm leading-relaxed max-w-xs">
+          Parce que nous croyons qu'une banque doit agir pour la
+          societe, nous accompagnons vos projets avec une vision
+          durable et solidaire.
+        </p>
+      </div>
+
+      {/* Cards du bas */}
+      <div className="relative z-10 grid grid-cols-2 gap-4 mt-8">
+        <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
+          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
+            <Shield size={16} className="text-white" />
+          </div>
+          <p className="text-white font-semibold text-sm">Espace Assurance</p>
+          <p className="text-blue-200 text-xs mt-1">
+            Gerez vos contrats et declarez vos sinistres en quelques clics.
+          </p>
+        </div>
+        <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
+          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="white">
+              <rect x="5" y="2" width="14" height="20" rx="2" stroke="white" strokeWidth="2" fill="none"/>
+              <circle cx="12" cy="17" r="1" fill="white"/>
+            </svg>
+          </div>
+          <p className="text-white font-semibold text-sm">Appli Mobile</p>
+          <p className="text-blue-200 text-xs mt-1">
+            Votre banque vous suit partout, en toute securite.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function LoginPage() {
   const router = useRouter()
   const { login } = useAuthStore()
-  const [etape, setEtape] = useState<'login' | '2fa'>('login')
-  const [email, setEmail] = useState('')
+  const [etape, setEtape] = useState<'identifiant' | 'password' | '2fa'>('identifiant')
+  const [identifiant, setIdentifiant] = useState('')
   const [password, setPassword] = useState('')
   const [code2fa, setCode2fa] = useState('')
-  const [showPass, setShowPass] = useState(false)
+  const [memoriser, setMemoriser] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function handleLogin(e: React.FormEvent) {
+  function handleIdentifiant(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    if (identifiant.length !== 10) {
+      setError("L'identifiant doit contenir 10 chiffres")
+      return
+    }
+    setEtape('password')
+  }
+
+  async function handlePassword(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    if (password.length !== 6) {
+      setError('Le mot de passe doit contenir 6 chiffres')
+      return
+    }
     setLoading(true)
     await new Promise((r) => setTimeout(r, 800))
-    if (verifierCredentials(email, password)) {
+    if (verifierCredentials(identifiant, password)) {
       setEtape('2fa')
     } else {
-      setError('Email ou mot de passe incorrect')
+      setError('Identifiant ou mot de passe incorrect')
+      setPassword('')
     }
     setLoading(false)
   }
@@ -44,128 +160,224 @@ export default function LoginPage() {
       router.push('/dashboard')
     } else {
       setError('Code incorrect')
+      setCode2fa('')
       setLoading(false)
     }
   }
 
+  const PanneauGauche = ({ children }: { children: React.ReactNode }) => (
+    <div className="flex flex-col justify-center px-8 py-10 lg:px-12">
+      {/* Header logo */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-1">
+        <p className='w-15 h-11'><img src="https://upload.wikimedia.org/wikipedia/fr/thumb/d/d4/Logo_La_Banque_postale_2022.svg/1280px-Logo_La_Banque_postale_2022.svg.png" alt="" /></p>
+          <span className="font-bold text-gray-900 text-lg tracking-tight">
+            LA BANQUE POSTALE
+          </span>
+        </div>
+      </div>
+      {children}
+      {/* Footer */}
+      <p className="text-xs text-gray-400 mt-8 text-center lg:text-left">
+        La Banque Postale · SA a Directoire et Conseil de Surveillance
+      </p>
+    </div>
+  )
+
+  // ── 2FA ───────────────────────────────────
   if (etape === '2fa') {
     return (
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#009B4E] rounded-2xl mb-4">
-            <span className="text-white font-bold text-xl">BNP</span>
+      <div className="min-h-screen grid lg:grid-cols-2 bg-gray-50">
+        <PanneauGauche>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Verification</h2>
+            <p className="text-sm text-gray-500">
+              Code envoye par SMS au +33 7 xx xx xx 09
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">BNP Paribas</h1>
-          <p className="text-sm text-gray-500 mt-1">Banque en ligne securisee</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
-              <Shield size={20} className="text-[#009B4E]" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                Verification en 2 etapes
-              </h2>
-              <p className="text-xs text-gray-500">
-                Code envoye par SMS au +33 6 xx xx xx 42
-              </p>
-            </div>
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-5">
+            <Shield size={15} className="text-[#003189] flex-shrink-0" />
+            <p className="text-xs text-[#003189]">
+              Saisissez le code recu par SMS
+            </p>
           </div>
           <form onSubmit={handle2FA} className="space-y-4">
-            <Input
-              label="Code (6 chiffres)"
-              type="text"
-              inputMode="numeric"
-              placeholder="123456"
-              maxLength={6}
-              value={code2fa}
-              onChange={(e) => setCode2fa(e.target.value)}
-              icon={<Shield size={16} />}
-              required
-            />
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Code (6 chiffres)
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="• • • • • •"
+                value={code2fa}
+                onChange={(e) => setCode2fa(e.target.value.replace(/\D/g, ''))}
+                className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-center text-2xl font-mono tracking-widest focus:outline-none focus:border-[#003189] transition-colors"
+              />
+            </div>
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+              <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg text-center">
                 {error}
               </p>
             )}
-            <Button type="submit" className="w-full" size="lg" loading={loading}>
-              Valider le code
-            </Button>
+            <button
+              type="submit"
+              disabled={code2fa.length !== 6 || loading}
+              className="w-full text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50"
+              style={{ background: '#003189' }}
+            >
+              {loading ? 'Verification...' : 'Valider'}
+            </button>
             <button
               type="button"
-              onClick={() => { setEtape('login'); setCode2fa(''); setError('') }}
-              className="w-full text-sm text-gray-500 hover:text-gray-700 py-2"
+              onClick={() => { setEtape('password'); setCode2fa(''); setError('') }}
+              className="w-full text-sm text-gray-400 hover:text-gray-600 py-1"
             >
               Retour
             </button>
           </form>
-          <p className="text-xs text-gray-400 text-center mt-4">
-            Code demo : <strong>{MOCK_CREDENTIALS.code2fa}</strong>
-          </p>
-        </div>
+
+        </PanneauGauche>
+        <PanneauDroit />
       </div>
     )
   }
 
-  return (
-    <div className="w-full max-w-md">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-[#009B4E] rounded-2xl mb-4">
-          <span className="text-white font-bold text-xl">BNP</span>
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900">BNP Paribas</h1>
-        <p className="text-sm text-gray-500 mt-1">Banque en ligne securisee</p>
-      </div>
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-6">
-          Connexion a votre espace
-        </h2>
-        <form onSubmit={handleLogin} className="space-y-4">
-          <Input
-            label="Adresse e-mail"
-            type="email"
-            placeholder="exemple@email.fr"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            icon={<Mail size={16} />}
-            required
-          />
-          <div className="relative">
-            <Input
-              label="Mot de passe"
-              type={showPass ? 'text' : 'password'}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              icon={<Lock size={16} />}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
-            >
-              {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
+  // ── Mot de passe ──────────────────────────
+  if (etape === 'password') {
+    return (
+      <div className="min-h-screen grid lg:grid-cols-2 bg-gray-50">
+        <PanneauGauche>
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Bonjour,</h2>
+            <p className="text-sm text-gray-500">
+              Saisissez votre mot de passe a 6 chiffres.
+            </p>
           </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-2 mb-4">
+            <User size={14} className="text-gray-400" />
+            <span className="text-sm text-gray-600 font-mono">
+              {identifiant.slice(0, 3)}xxxxxxx
+            </span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              Mot de passe (6 chiffres)
+            </label>
+            <IndicateurCode longueur={password.length} total={6} />
+          </div>
+
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg text-center mb-2">
               {error}
             </p>
           )}
-          <Button type="submit" className="w-full" size="lg" loading={loading}>
-            Se connecter
-          </Button>
-        </form>
-        <div className="mt-5 p-3 bg-gray-50 rounded-lg border border-gray-100">
-          <p className="text-xs text-gray-500 text-center font-medium mb-1">
-            Identifiants de demo
-          </p>
-          <p className="text-xs text-gray-400 text-center">{MOCK_CREDENTIALS.email}</p>
-          <p className="text-xs text-gray-400 text-center">{MOCK_CREDENTIALS.password}</p>
-        </div>
+
+          <ClavierVirtuel
+            onPress={(v) => {
+              if (password.length < 6) setPassword((p) => p + v)
+            }}
+            onDelete={() => setPassword((p) => p.slice(0, -1))}
+          />
+
+          <button
+            type="button"
+            onClick={handlePassword}
+            disabled={password.length !== 6 || loading}
+            className="w-full mt-4 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50"
+            style={{ background: '#003189' }}
+          >
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setEtape('identifiant'); setPassword(''); setError('') }}
+            className="w-full text-sm text-center mt-3"
+            style={{ color: '#003189' }}
+          >
+            Mot de passe oublie ?
+          </button>
+
+
+        </PanneauGauche>
+        <PanneauDroit />
       </div>
+    )
+  }
+
+  // ── Identifiant ───────────────────────────
+  return (
+    <div className="min-h-screen grid lg:grid-cols-2 bg-gray-50">
+      <PanneauGauche>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Bonjour,</h2>
+          <p className="text-sm text-gray-500">
+            Saisissez votre identifiant pour acceder a vos comptes.
+          </p>
+        </div>
+
+        <form onSubmit={handleIdentifiant} className="space-y-5">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              Identifiant (10 chiffres)
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="Ex: 1234567890"
+                value={identifiant}
+                onChange={(e) => setIdentifiant(e.target.value.replace(/\D/g, ''))}
+                className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-base font-mono tracking-widest focus:outline-none focus:border-[#003189] transition-colors pr-10"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <User size={16} className="text-gray-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Memoriser mon identifiant</span>
+            <button
+              type="button"
+              onClick={() => setMemoriser(!memoriser)}
+              className="w-11 h-6 rounded-full transition-colors flex items-center px-0.5"
+              style={{ background: memoriser ? '#003189' : '#e5e7eb' }}
+            >
+              <span
+                className="w-5 h-5 bg-white rounded-full shadow transition-transform"
+                style={{ transform: memoriser ? 'translateX(20px)' : 'translateX(0)' }}
+              />
+            </button>
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg text-center">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={identifiant.length !== 10}
+            className="w-full text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: '#003189' }}
+          >
+            Continuer
+          </button>
+
+          
+        </form>
+
+        
+      </PanneauGauche>
+
+      <PanneauDroit />
     </div>
   )
 }

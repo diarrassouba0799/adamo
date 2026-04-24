@@ -3,177 +3,299 @@ import { useState } from 'react'
 import { Carte } from '@/types'
 import { formatMontant } from '@/lib/utils'
 import { Lock, Unlock } from 'lucide-react'
-import Button from '@/components/ui/Button'
 
-function LogoBNP() {
+function PuceEMV() {
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="w-8 h-8 bg-[#009B4E] rounded flex items-center justify-center flex-shrink-0">
-        <svg viewBox="0 0 32 32" className="w-6 h-6" fill="white">
-          <path d="M6 8 L14 16 L6 24 M10 8 L18 16 L10 24 M14 8 L22 16 L14 24" stroke="white" strokeWidth="2" fill="none"/>
-        </svg>
-      </div>
-      <div className="leading-tight">
-        <p className="text-white font-bold text-xs tracking-wide">BNP PARIBAS</p>
-        <div className="w-full h-px bg-white/60 my-0.5" />
-        <p className="text-white/80 text-[9px] tracking-widest font-medium">FORTIS</p>
-      </div>
-    </div>
-  )
-}
-
-function LogoMaestro() {
-  return (
-    <div className="flex flex-col items-center gap-0.5">
-      <div className="flex">
-        <div className="w-7 h-7 rounded-full bg-red-500 opacity-90" />
-        <div className="w-7 h-7 rounded-full bg-blue-500 opacity-90 -ml-3" />
-      </div>
-      <p className="text-white/70 text-[8px] tracking-wider">maestro.</p>
-    </div>
-  )
-}
-
-function LogoBancontact() {
-  return (
-    <div className="bg-white rounded px-1.5 py-1 flex items-center gap-1">
-      <div className="w-5 h-3 relative">
-        <div className="absolute inset-0 bg-[#005498] rounded-sm" />
-        <div className="absolute right-0 top-0 bottom-0 w-2.5 bg-[#FFCC00] rounded-r-sm" />
-        <div className="absolute left-1 top-0.5 bottom-0.5 w-1.5 bg-white rounded-sm" style={{clipPath: 'polygon(0 0, 100% 50%, 0 100%)'}} />
-      </div>
-      <span className="text-[7px] font-bold text-gray-700">Bancontact</span>
-    </div>
-  )
-}
-
-function PuceChip() {
-  return (
-    <div className="w-10 h-8 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-md border border-yellow-500/40 grid grid-cols-3 grid-rows-3 gap-px p-0.5">
-      {Array.from({length: 9}).map((_, i) => (
-        <div key={i} className={`rounded-sm ${i === 4 ? 'bg-yellow-300' : 'bg-yellow-500/60'}`} />
-      ))}
-    </div>
-  )
-}
-
-function WifiIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="w-5 h-5 text-white/80" fill="none">
-      <path d="M5 12.5c1.9-1.9 4.5-3 7-3s5.1 1.1 7 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M8.5 16c.9-.9 2.2-1.5 3.5-1.5s2.6.6 3.5 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <circle cx="12" cy="19" r="1" fill="currentColor"/>
+    <svg viewBox="0 0 48 38" width="44" height="34">
+      <defs>
+        <linearGradient id="cg2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#e8c84a"/>
+          <stop offset="40%" stopColor="#f0d060"/>
+          <stop offset="100%" stopColor="#c8a830"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="48" height="38" rx="4" fill="url(#cg2)" stroke="#b8941a" strokeWidth="0.8"/>
+      <rect x="3" y="4" width="13" height="10" rx="1.5" fill="#c8a830" stroke="#a07820" strokeWidth="0.5"/>
+      <rect x="3" y="16" width="13" height="10" rx="1.5" fill="#c8a830" stroke="#a07820" strokeWidth="0.5"/>
+      <rect x="3" y="28" width="13" height="7" rx="1.5" fill="#c8a830" stroke="#a07820" strokeWidth="0.5"/>
+      <rect x="32" y="4" width="13" height="10" rx="1.5" fill="#c8a830" stroke="#a07820" strokeWidth="0.5"/>
+      <rect x="32" y="16" width="13" height="10" rx="1.5" fill="#c8a830" stroke="#a07820" strokeWidth="0.5"/>
+      <rect x="32" y="28" width="13" height="7" rx="1.5" fill="#c8a830" stroke="#a07820" strokeWidth="0.5"/>
+      <rect x="17" y="0" width="14" height="38" fill="url(#cg2)"/>
+      <line x1="24" y1="0" x2="24" y2="38" stroke="#b8941a" strokeWidth="0.5"/>
+      <rect x="14" y="8" width="20" height="16" rx="2" fill="#2a1a08" stroke="#8a6010" strokeWidth="0.5"/>
+      <rect x="16" y="10" width="5" height="4" rx="0.5" fill="#3a2a10"/>
+      <rect x="23" y="10" width="5" height="4" rx="0.5" fill="#3a2a10"/>
+      <rect x="16" y="16" width="5" height="4" rx="0.5" fill="#3a2a10"/>
+      <rect x="23" y="16" width="5" height="4" rx="0.5" fill="#3a2a10"/>
+      <circle cx="24" cy="16" r="2" fill="#f0d060" opacity="0.7"/>
     </svg>
+  )
+}
+
+function NFC({ color = 'white' }: { color?: string }) {
+  return (
+    <svg viewBox="0 0 28 32" width="20" height="24">
+      <circle cx="4" cy="16" r="2.5" fill={color} opacity="0.8"/>
+      <path d="M10 8 A10 10 0 0 1 10 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" opacity="0.75"/>
+      <path d="M15 4 A16 16 0 0 1 15 28" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
+      <path d="M20 1 A22 22 0 0 1 20 31" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/>
+    </svg>
+  )
+}
+
+function LogoCB({ dark = false }: { dark?: boolean }) {
+  return (
+    <div
+      className="flex items-center justify-center rounded-md px-2 py-1"
+      style={{
+        background: dark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.2)',
+        border: `1px solid ${dark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)'}`,
+      }}
+    >
+      <span
+        className="font-bold text-sm tracking-widest"
+        style={{ color: dark ? '#8B6914' : 'white', fontStyle: 'italic' }}
+      >
+        CB
+      </span>
+    </div>
+  )
+}
+
+function LogoLaBanquePostale({ dark = false }: { dark?: boolean }) {
+  const color = dark ? '#4a3000' : 'white'
+  return (
+    <div className="flex items-end gap-1.5">
+      <svg viewBox="0 0 24 28" width="18" height="21" fill={color}>
+        <path d="M12 0 L22 6 L22 18 L12 24 L2 18 L2 6 Z" opacity="0.9"/>
+        <path d="M12 4 L19 8 L19 16 L12 20 L5 16 L5 8 Z" fill="none" stroke={color} strokeWidth="1.5"/>
+      </svg>
+      <div className="leading-tight">
+        <p className="text-[9px] font-bold tracking-wider" style={{ color }}>LA</p>
+        <p className="text-[9px] font-bold tracking-wider" style={{ color }}>BANQUE</p>
+        <p className="text-[9px] font-bold tracking-wider" style={{ color }}>POSTALE</p>
+      </div>
+    </div>
+  )
+}
+
+function CarteVisuelleBlue({ carte, bloquee }: { carte: Carte; bloquee: boolean }) {
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden select-none"
+      style={{
+        height: '210px',
+        background: bloquee
+          ? 'linear-gradient(135deg, #6b7280, #9ca3af)'
+          : 'linear-gradient(145deg, #003189 0%, #0050c8 30%, #1a6fd4 55%, #0a3fa0 80%, #002070 100%)',
+        boxShadow: bloquee
+          ? '0 8px 24px rgba(0,0,0,0.2)'
+          : '0 8px 32px rgba(0,49,137,0.45)',
+      }}
+    >
+      {/* Texture ondulée simulée */}
+      <div className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 4px,
+            rgba(255,255,255,0.08) 4px,
+            rgba(255,255,255,0.08) 8px
+          )`,
+        }}
+      />
+      {/* Reflet haut */}
+      <div className="absolute top-0 left-0 right-0 h-1/3 opacity-10"
+        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.4), transparent)' }}
+      />
+
+      {/* Logo WWF style (maison postale) */}
+      <div className="absolute top-4 left-4">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+            <rect x="9" y="13" width="6" height="8" fill="rgba(0,49,137,0.6)" rx="1"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Puce + NFC + CB */}
+      <div className="absolute top-14 left-4 flex items-center gap-3">
+        <PuceEMV />
+        <NFC color="white" />
+      </div>
+      <div className="absolute top-4 right-4">
+        <LogoCB dark={false} />
+      </div>
+
+      {/* VISA */}
+      <div className="absolute bottom-8 right-5">
+        <span className="text-white font-bold text-2xl italic tracking-tight"
+          style={{ fontFamily: 'Georgia, serif', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+          VISA
+        </span>
+      </div>
+
+      {/* Logo La Banque Postale + nom */}
+      <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end">
+        <LogoLaBanquePostale dark={false} />
+        <p className="text-white/80 font-mono text-[9px] tracking-wider">
+          {carte.numero}
+        </p>
+      </div>
+
+      {/* Titulaire */}
+      <div className="absolute bottom-12 left-4">
+        <p className="text-white/90 text-xs font-semibold tracking-widest">
+          {carte.titulaire}
+        </p>
+        <p className="text-white/50 text-[9px] mt-0.5">
+          Expire : {carte.expiration}
+        </p>
+      </div>
+
+      {bloquee && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl backdrop-blur-sm">
+          <div className="text-center">
+            <Lock size={28} className="text-white mx-auto mb-1"/>
+            <span className="text-white font-bold text-sm tracking-widest">CARTE BLOQUEE</span>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CarteVisuellePremier({ carte, bloquee }: { carte: Carte; bloquee: boolean }) {
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden select-none"
+      style={{
+        height: '210px',
+        background: bloquee
+          ? 'linear-gradient(135deg, #6b7280, #9ca3af)'
+          : 'linear-gradient(145deg, #c8973a 0%, #e8b84a 25%, #d4a030 50%, #f0c860 70%, #b8861a 100%)',
+        boxShadow: bloquee
+          ? '0 8px 24px rgba(0,0,0,0.2)'
+          : '0 8px 32px rgba(180,140,30,0.45)',
+      }}
+    >
+      {/* Texture martelée dorée */}
+      <div className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage: `radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 40%),
+            radial-gradient(circle at 70% 60%, rgba(255,255,255,0.2) 0%, transparent 35%),
+            radial-gradient(circle at 50% 80%, rgba(200,150,30,0.4) 0%, transparent 45%)`,
+        }}
+      />
+
+      {/* Puce + NFC + CB */}
+      <div className="absolute top-14 left-4 flex items-center gap-3">
+        <PuceEMV />
+        <NFC color="#4a3000" />
+      </div>
+      <div className="absolute top-4 right-4">
+        <LogoCB dark={true} />
+      </div>
+
+      {/* VISA Premier */}
+      <div className="absolute bottom-8 right-5 text-right">
+        <p className="font-bold text-2xl italic tracking-tight"
+          style={{ color: '#4a3000', fontFamily: 'Georgia, serif', textShadow: '0 1px 2px rgba(255,220,100,0.5)' }}>
+          VISA
+        </p>
+        <p className="text-xs font-semibold tracking-widest" style={{ color: '#6a4800' }}>
+          Premier
+        </p>
+      </div>
+
+      {/* Logo La Banque Postale */}
+      <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end">
+        <LogoLaBanquePostale dark={true} />
+        <p className="font-mono text-[9px] tracking-wider" style={{ color: '#6a4800' }}>
+          {carte.numero}
+        </p>
+      </div>
+
+      {/* Titulaire */}
+      <div className="absolute bottom-12 left-4">
+        <p className="text-xs font-semibold tracking-widest" style={{ color: '#3a2000' }}>
+          {carte.titulaire}
+        </p>
+        <p className="text-[9px] mt-0.5" style={{ color: '#8a6010' }}>
+          Expire : {carte.expiration}
+        </p>
+      </div>
+
+      {bloquee && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl backdrop-blur-sm">
+          <div className="text-center">
+            <Lock size={28} className="text-white mx-auto mb-1"/>
+            <span className="text-white font-bold text-sm tracking-widest">CARTE BLOQUEE</span>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
 export default function CarteVisuelle({ carte }: { carte: Carte }) {
   const [bloquee, setBloquee] = useState(carte.statut === 'bloquee')
   const pct = Math.round((carte.depensesMois / carte.plafond) * 100)
+  const isPremier = carte.type === 'mastercard'
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-5">
 
-      {/* ── Carte visuelle style BNP Paribas Fortis ── */}
-      <div
-        className="relative rounded-2xl overflow-hidden select-none"
-        style={{
-          background: bloquee
-            ? 'linear-gradient(135deg, #6b7280, #9ca3af)'
-            : 'linear-gradient(135deg, #4a5568 0%, #5a6a7a 40%, #4a5c6a 100%)',
-          height: '200px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-        }}
-      >
-        {/* Reflet subtil */}
-        <div className="absolute inset-0 opacity-10"
-          style={{background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%)'}} />
+      {isPremier ? (
+        <CarteVisuellePremier carte={carte} bloquee={bloquee} />
+      ) : (
+        <CarteVisuelleBlue carte={carte} bloquee={bloquee} />
+      )}
 
-        {/* Ligne décorative */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#009B4E] via-[#00c060] to-[#009B4E]" />
-
-        {/* Header : Logo BNP + Maestro */}
-        <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
-          <LogoBNP />
-          <LogoMaestro />
-        </div>
-
-        {/* Puce + Sans contact */}
-        <div className="absolute top-16 left-4 flex items-center gap-3">
-          <PuceChip />
-          <div className="flex items-center gap-1">
-            <span className="text-white/80 text-xs font-medium">Debit</span>
-            <WifiIcon />
-          </div>
-        </div>
-
-        {/* Bancontact */}
-        <div className="absolute top-16 right-4">
-          <LogoBancontact />
-        </div>
-
-        {/* Nom titulaire */}
-        <div className="absolute bottom-10 left-4 right-4">
-          <p className="text-white font-semibold text-sm tracking-wide">
-            {carte.titulaire}
-          </p>
-        </div>
-
-        {/* Infos bas de carte */}
-        <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <span className="text-white/50 text-[9px] w-10">card</span>
-              <span className="text-white/80 font-mono text-[10px]">{carte.numero}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-white/50 text-[9px] w-10">account</span>
-              <span className="text-white/80 font-mono text-[10px]">FR76 **** **** {carte.numero.slice(-4)}</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-white/50 text-[8px]">expires end</p>
-            <p className="text-white font-mono text-xs">{carte.expiration}</p>
-          </div>
-        </div>
-
-        {/* Overlay bloquée */}
-        {bloquee && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl backdrop-blur-sm">
-            <div className="text-center">
-              <Lock size={28} className="text-white mx-auto mb-1" />
-              <span className="text-white font-bold text-sm">CARTE BLOQUÉE</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── Plafond ── */}
+      {/* Plafond */}
       <div>
         <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-          <span>Dépenses ce mois</span>
+          <span>Depenses ce mois</span>
           <span>{formatMontant(carte.depensesMois)} / {formatMontant(carte.plafond)}</span>
         </div>
         <div className="w-full bg-gray-100 rounded-full h-2">
           <div
-            className={`h-2 rounded-full transition-all ${pct > 80 ? 'bg-red-500' : 'bg-[#009B4E]'}`}
-            style={{ width: `${Math.min(pct, 100)}%` }}
+            className="h-2 rounded-full transition-all"
+            style={{
+              width: `${Math.min(pct, 100)}%`,
+              background: pct > 80
+                ? '#ef4444'
+                : isPremier
+                  ? 'linear-gradient(90deg, #c8973a, #e8b84a)'
+                  : 'linear-gradient(90deg, #003189, #0050c8)',
+            }}
           />
         </div>
-        <p className="text-xs text-gray-400 mt-1">{pct}% du plafond utilisé</p>
+        <p className="text-xs text-gray-400 mt-1">{pct}% du plafond utilise</p>
       </div>
 
-      {/* ── Bouton ── */}
-      <Button
-        variant={bloquee ? 'primary' : 'danger'}
-        className="w-full"
+      {/* Bouton */}
+      <button
         onClick={() => setBloquee(!bloquee)}
+        className="w-full flex items-center justify-center gap-2 font-medium py-2.5 rounded-xl transition-colors text-sm"
+        style={{
+          background: bloquee
+            ? (isPremier ? '#c8973a' : '#003189')
+            : '#ef4444',
+          color: 'white',
+        }}
       >
         {bloquee
-          ? <><Unlock size={16} className="mr-2" />Débloquer la carte</>
-          : <><Lock size={16} className="mr-2" />Bloquer la carte</>
+          ? <><Unlock size={16}/> Debloquer la carte</>
+          : <><Lock size={16}/> Bloquer la carte</>
         }
-      </Button>
+      </button>
     </div>
   )
 }
