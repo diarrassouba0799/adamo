@@ -14,10 +14,10 @@ export default function ParametresClient() {
   const { user, avatar, logout, setAvatar, updateUser } = useAuthStore()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const [prenom, setPrenom] = useState(user?.prenom || '')
-  const [nom, setNom] = useState(user?.nom || '')
-  const [email, setEmail] = useState(user?.email || '')
-  const [telephone, setTelephone] = useState('+33 6 12 34 56 78')
+  const [prenom, setPrenom] = useState(user?.prenom || 'Christian')
+  const [nom, setNom] = useState(user?.nom || 'Agniel')
+  const [email, setEmail] = useState(user?.email || 'annadoux1@gmail.com')
+  const [telephone, setTelephone] = useState('+33 7 57 84 25 03')
   const [saved, setSaved] = useState(false)
 
   const [notifVirement, setNotifVirement] = useState(true)
@@ -47,7 +47,7 @@ export default function ParametresClient() {
 
   function handleChangePass(e: React.FormEvent) {
     e.preventDefault()
-    if (oldPass !== 'BNP2025!') {
+    if (oldPass !== '854525') {
       setPassMsg('Mot de passe actuel incorrect')
       return
     }

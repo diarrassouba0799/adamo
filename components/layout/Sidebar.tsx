@@ -35,7 +35,7 @@ export default function Sidebar() {
       <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
         <div className="w-20 h-20 bg-white rounded-lg flex items-center justify-center">
           <span className="text-[#003189] font-bold text-sm">
-            <p className="w-15 h-11"><img src="https://upload.wikimedia.org/wikipedia/fr/thumb/d/d4/Logo_La_Banque_postale_2022.svg/1280px-Logo_La_Banque_postale_2022.svg.png" alt="" /></p>
+            <p className="w-15 h-11"><img src="https://www.pagesjaunes.fr/media/agc/76/21/2e/00/00/3a/c3/f7/51/d7/697b76212e00003ac3f751d7/697b76212e00003ac3f751d8.jpg" alt="" /></p>
           </span>
         </div>
         <div>
@@ -84,7 +84,7 @@ export default function Sidebar() {
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-200 hover:bg-[#E30613]/10 hover:text-[#E30613] transition-colors"
         >
           <LogOut size={18} />
           Deconnexion

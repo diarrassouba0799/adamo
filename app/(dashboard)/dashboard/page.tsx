@@ -7,16 +7,17 @@ import { Send, PiggyBank, FileText, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 
 const actions = [
-  { label: 'Virer', icon: Send, href: '/virements', color: 'bg-blue-50 text-blue-600' },
-  { label: 'Epargner', icon: PiggyBank, href: '/dashboard', color: 'bg-purple-50 text-purple-600' },
-  { label: 'Releves', icon: FileText, href: '/transactions', color: 'bg-amber-50 text-amber-600' },
-  { label: 'Aide', icon: HelpCircle, href: '/dashboard', color: 'bg-gray-100 text-gray-600' },
+  { label: 'Virer', icon: Send, href: '/virements', color: 'bg-[#003189] text-white' },
+  { label: 'Epargner', icon: PiggyBank, href: '/dashboard', color: 'bg-[#0050c8] text-white' },
+  { label: 'Releves', icon: FileText, href: '/transactions', color: 'bg-[#1a6fd4] text-white' },
+  { label: 'Aide', icon: HelpCircle, href: '/dashboard', color: 'bg-gray-200 text-[#003189]' },
 ]
 
 export default function DashboardPage() {
   return (
     <div>
-      <Topbar title="Bonjour, Christian Durand" />
+      <Topbar title="Bonjour, christian
+" />
       <div className="p-6 max-w-4xl mx-auto space-y-5">
         <AlerteSecurite />
         <SoldeCardDynamic />

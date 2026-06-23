@@ -43,6 +43,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
+       
       user: null,
       isAuthenticated: false,
       solde: mockComptes[0].solde,

@@ -9,21 +9,40 @@ import { verifierCodeVirement } from '@/lib/auth'
 
 type Etape = 'formulaire' | 'confirmation' | '2fa' | 'succes'
 
-function Compte48h({ dateEnvoi }: { dateEnvoi: number }) {
+function Compte48h({
+  dateEnvoi,
+  onExpire,
+}: {
+  dateEnvoi: number
+  onExpire: () => void
+}) {
   const dateCible = dateEnvoi + 48 * 60 * 60 * 1000
   const [restant, setRestant] = useState(dateCible - Date.now())
+  const [expired, setExpired] = useState(false)
 
   useEffect(() => {
+    if (restant <= 0 && !expired) {
+      setExpired(true)
+      onExpire()
+      return
+    }
+
     const interval = setInterval(() => {
       const r = dateCible - Date.now()
       setRestant(r)
-      if (r <= 0) clearInterval(interval)
+      if (r <= 0) {
+        clearInterval(interval)
+        if (!expired) {
+          setExpired(true)
+          onExpire()
+        }
+      }
     }, 1000)
     return () => clearInterval(interval)
-  }, [dateCible])
+  }, [dateCible, expired, onExpire, restant])
 
   if (restant <= 0) {
-    return <span className="text-green-600 font-semibold">Credite</span>
+    return <span className="text-green-600 font-semibold">Crédité</span>
   }
 
   const heures = Math.floor(restant / (1000 * 60 * 60))
@@ -32,7 +51,8 @@ function Compte48h({ dateEnvoi }: { dateEnvoi: number }) {
 
   return (
     <span className="font-mono font-semibold text-amber-700">
-      {String(heures).padStart(2, '0')}h {String(minutes).padStart(2, '0')}m {String(secondes).padStart(2, '0')}s
+      {String(heures).padStart(2, '0')}h {String(minutes).padStart(2, '0')}m{' '}
+      {String(secondes).padStart(2, '0')}s
     </span>
   )
 }
@@ -44,6 +64,7 @@ export default function VirementForm() {
     setAlerteSecurite,
     ajouterTransaction,
     ajouterVirementEnCours,
+    setCompteEnVerification,
   } = useAuthStore()
 
   const [etape, setEtape] = useState<Etape>('formulaire')
@@ -62,11 +83,42 @@ export default function VirementForm() {
   const montantNum = parseFloat(form.montant) || 0
   const estInhabituel = montantNum > 500
 
+  // ── Restauration du timer depuis localStorage au montage ──────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('virement_en_cours')
+    if (!stored) return
+
+    const virement = JSON.parse(stored)
+    const dateCreditPrevue = virement.dateEnvoi + 48 * 60 * 60 * 1000
+
+    if (Date.now() >= dateCreditPrevue) {
+      // Les 48h sont déjà écoulées → déclencher immédiatement
+      localStorage.removeItem('virement_en_cours')
+      setCompteEnVerification(true, {
+        id: virement.id,
+        beneficiaire: virement.beneficiaire,
+        montant: virement.montant,
+        motif: virement.motif,
+      })
+    } else {
+      // Timer encore actif → restaurer l'état succes
+      setForm({
+        beneficiaire: virement.beneficiaire,
+        iban: '',
+        montant: String(virement.montant),
+        motif: virement.motif,
+      })
+      setReference(virement.id)
+      setDateEnvoi(virement.dateEnvoi)
+      setEtape('succes')
+    }
+  }, [setCompteEnVerification])
+
   function validate(): boolean {
     const e: Record<string, string> = {}
-    if (!form.beneficiaire.trim()) e.beneficiaire = 'Nom du beneficiaire requis'
+    if (!form.beneficiaire.trim()) e.beneficiaire = 'Nom du bénéficiaire requis'
     if (!form.iban.trim() || form.iban.replace(/\s/g, '').length < 14)
-      e.iban = 'IBAN invalide (minimum 14 caracteres)'
+      e.iban = 'IBAN invalide (minimum 14 caractères)'
     if (!form.montant || montantNum <= 0) e.montant = 'Montant invalide'
     if (montantNum > solde)
       e.montant = `Solde insuffisant (disponible : ${formatMontant(solde)})`
@@ -86,7 +138,7 @@ export default function VirementForm() {
     await new Promise((r) => setTimeout(r, 1000))
 
     if (!verifierCodeVirement(code2fa)) {
-      setErrors({ code: 'Code incorrect. Reessayez.' })
+      setErrors({ code: 'Code incorrect. Réessayez.' })
       setLoading(false)
       return
     }
@@ -116,6 +168,18 @@ export default function VirementForm() {
       dateCreditPrevue: maintenant + 48 * 60 * 60 * 1000,
     })
 
+    // Sauvegarder dans localStorage pour survie au rechargement
+    localStorage.setItem(
+      'virement_en_cours',
+      JSON.stringify({
+        id: ref,
+        beneficiaire: form.beneficiaire,
+        montant: montantNum,
+        motif: form.motif,
+        dateEnvoi: maintenant,
+      })
+    )
+
     if (estInhabituel) {
       setAlerteSecurite({
         active: true,
@@ -130,17 +194,28 @@ export default function VirementForm() {
     setLoading(false)
   }
 
+  // Appelé par Compte48h quand le timer atteint zéro
+  function handleExpiration() {
+    localStorage.removeItem('virement_en_cours')
+    setCompteEnVerification(true, {
+      id: reference,
+      beneficiaire: form.beneficiaire,
+      montant: montantNum,
+      motif: form.motif,
+    })
+  }
+
   // ── Succes ────────────────────────────────
   if (etape === 'succes') {
     return (
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 space-y-5">
         <div className="text-center space-y-3">
           <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle size={36} className="text-[#003189]" />
+            <CheckCircle size={36} className="text-[#1F3A8A]" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Virement envoye !</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Virement envoyé !</h3>
           <p className="text-gray-500 text-sm">
-            {formatMontant(montantNum)} debites vers{' '}
+            {formatMontant(montantNum)} débités vers{' '}
             <strong>{form.beneficiaire}</strong>
           </p>
           <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-4 py-2 font-mono">
@@ -152,31 +227,34 @@ export default function VirementForm() {
           <div className="flex items-center gap-2">
             <Clock size={18} className="text-amber-600" />
             <p className="font-semibold text-amber-900 text-sm">
-              Credit prevu dans
+              Crédit prévu dans
             </p>
           </div>
           <div className="text-2xl text-center py-2">
-            <Compte48h dateEnvoi={dateEnvoi} />
+            {dateEnvoi > 0 && (
+              <Compte48h dateEnvoi={dateEnvoi} onExpire={handleExpiration} />
+            )}
           </div>
           <div className="w-full bg-amber-100 rounded-full h-1.5">
             <div className="bg-amber-500 h-1.5 rounded-full w-full animate-pulse" />
           </div>
           <p className="text-xs text-amber-700 text-center">
-            Le virement sera credite sur le compte de{' '}
+            Le virement sera crédité sur le compte de{' '}
             <strong>{form.beneficiaire}</strong> dans les 48 heures.
           </p>
         </div>
 
         <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-xs text-gray-500">
-          <p>Solde debite immediatement</p>
-          <p>Transaction enregistree dans votre historique</p>
-          <p>Credit sur le compte beneficiaire : sous 48h ouvrees</p>
+          <p>Solde débité immédiatement</p>
+          <p>Transaction enregistrée dans votre historique</p>
+          <p>Crédit sur le compte bénéficiaire : sous 48h ouvrées</p>
         </div>
 
         <Button
           className="w-full"
-          style={{ backgroundColor: '#003189' }}
+          style={{ backgroundColor: '#1F3A8A' }}
           onClick={() => {
+            localStorage.removeItem('virement_en_cours')
             setEtape('formulaire')
             setForm({ beneficiaire: '', iban: '', montant: '', motif: '' })
             setCode2fa('')
@@ -195,22 +273,22 @@ export default function VirementForm() {
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
         <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
           <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-            <Shield size={20} className="text-[#003189]" />
+            <Shield size={20} className="text-[#1F3A8A]" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">Confirmation par SMS</h3>
             <p className="text-xs text-gray-500">
-              Code envoye au +33 6 xx xx xx 42
+              Code envoyé au +33 6 xx xx xx 42
             </p>
           </div>
         </div>
 
         <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
           <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">
-            Recapitulatif
+            Récapitulatif
           </p>
           <div className="flex justify-between">
-            <span className="text-gray-500">Beneficiaire</span>
+            <span className="text-gray-500">Bénéficiaire</span>
             <span className="font-medium">{form.beneficiaire}</span>
           </div>
           <div className="flex justify-between">
@@ -239,7 +317,7 @@ export default function VirementForm() {
               placeholder="000000"
               value={code2fa}
               onChange={(e) => setCode2fa(e.target.value.replace(/\D/g, ''))}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-center text-xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-[#003189] focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-center text-xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-[#1F3A8A] focus:border-transparent"
             />
           </div>
           {errors.code && (
@@ -250,7 +328,7 @@ export default function VirementForm() {
           <button
             type="submit"
             disabled={code2fa.length !== 6 || loading}
-            className="w-full bg-[#003189] hover:bg-[#002070] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors"
+            className="w-full bg-[#1F3A8A] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors"
           >
             {loading ? 'Validation...' : 'Confirmer le virement'}
           </button>
@@ -262,7 +340,6 @@ export default function VirementForm() {
             Retour
           </button>
         </form>
-
       </div>
     )
   }
@@ -301,7 +378,7 @@ export default function VirementForm() {
           <div className="flex gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
             <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-700">
-              <strong>Virement inhabituel</strong> — Une verification SMS sera requise.
+              <strong>Virement inhabituel</strong> — Une vérification SMS sera requise.
             </p>
           </div>
         )}
@@ -314,7 +391,7 @@ export default function VirementForm() {
           </button>
           <button
             onClick={() => setEtape('2fa')}
-            className="flex-1 bg-[#003189] hover:bg-[#002070] text-white font-medium py-2.5 rounded-xl transition-colors"
+            className="flex-1 bg-[#1F3A8A] hover:bg-[#2563EB] text-white font-medium py-2.5 rounded-xl transition-colors"
           >
             Continuer
           </button>
@@ -327,17 +404,17 @@ export default function VirementForm() {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
       <div className="mb-6 pb-4 border-b border-gray-100">
-        <h3 className="font-semibold text-gray-900">Emettre un virement</h3>
+        <h3 className="font-semibold text-gray-900">Émettre un virement</h3>
         <p className="text-xs text-gray-500 mt-0.5">
           Solde disponible :{' '}
-          <span className="font-semibold text-[#003189]">
+          <span className="font-semibold text-[#1F3A8A]">
             {formatMontant(solde)}
           </span>
         </p>
       </div>
       <form onSubmit={handleSoumettre} className="space-y-5">
         <Input
-          label="Nom du beneficiaire"
+          label="Nom du bénéficiaire"
           placeholder="Jean Martin"
           value={form.beneficiaire}
           onChange={(e) => setForm({ ...form, beneficiaire: e.target.value })}
@@ -367,16 +444,16 @@ export default function VirementForm() {
           onChange={(e) => setForm({ ...form, motif: e.target.value })}
         />
         <div className="flex gap-2 bg-blue-50 border border-blue-100 rounded-lg p-3">
-          <AlertCircle size={15} className="text-[#003189] flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-[#003189]">
-            Verifiez l'IBAN avant de valider. Les virements sont definitifs.
+          <AlertCircle size={15} className="text-[#1F3A8A] flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-[#1F3A8A]">
+            Vérifiez l'IBAN avant de valider. Les virements sont définitifs.
           </p>
         </div>
         <button
           type="submit"
-          className="w-full bg-[#003189] hover:bg-[#002070] text-white font-medium py-3 rounded-xl transition-colors"
+          className="w-full bg-[#1F3A8A] hover:bg-[#2563EB] text-white font-medium py-3 rounded-xl transition-colors"
         >
-          Verifier le virement
+          Vérifier le virement
         </button>
       </form>
     </div>
