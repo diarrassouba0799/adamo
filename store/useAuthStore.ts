@@ -37,13 +37,16 @@ interface AuthState {
   updateUser: (data: Partial<User>) => void
   ajouterTransaction: (t: Transaction) => void
   ajouterVirementEnCours: (v: VirementEnCours) => void
+  setCompteEnVerification: (
+    active: boolean,
+    virement?: VirementEnCours | null
+  ) => void
   verifierVirementsExpires: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-       
       user: null,
       isAuthenticated: false,
       solde: mockComptes[0].solde,
@@ -59,11 +62,12 @@ export const useAuthStore = create<AuthState>()(
         setTimeout(() => get().verifierVirementsExpires(), 100)
       },
 
-      logout: () => set({
-        user: null,
-        isAuthenticated: false,
-        alerteSecurite: null,
-      }),
+      logout: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+          alerteSecurite: null,
+        }),
 
       retirerMontant: (montant) =>
         set({ solde: Math.max(0, get().solde - montant) }),
@@ -81,6 +85,14 @@ export const useAuthStore = create<AuthState>()(
       ajouterVirementEnCours: (v) =>
         set({ virementsEnCours: [v, ...get().virementsEnCours] }),
 
+      // ── Action manquante, ajoutée ──────────────────────────
+      setCompteEnVerification: (active, virement = null) =>
+        set({
+          compteEnVerification: active,
+          virementVerification: virement,
+        }),
+
+      // ── Corrigée : utilise désormais setCompteEnVerification ──
       verifierVirementsExpires: () => {
         const { virementsEnCours, compteEnVerification } = get()
         if (compteEnVerification) return
@@ -89,15 +101,12 @@ export const useAuthStore = create<AuthState>()(
           (v) => maintenant >= v.dateCreditPrevue
         )
         if (expire) {
-          set({
-            compteEnVerification: true,
-            virementVerification: expire,
-          })
+          get().setCompteEnVerification(true, expire)
         }
       },
     }),
     {
-      name: 'bnp-auth-v2', // ← clé différente, repart proprement
+      name: 'demo-auth-v1', // clé renommée (générique, pas de référence à une banque réelle)
     }
   )
 )

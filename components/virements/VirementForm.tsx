@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import { useAuthStore } from '@/store/useAuthStore'
 import { formatMontant } from '@/lib/utils'
 import { verifierCodeVirement } from '@/lib/auth'
+import { startVirementWorker, stopVirementWorker, onVirementExpire } from '@/lib/virementWorker'
 
 type Etape = 'formulaire' | 'confirmation' | '2fa' | 'succes'
 
@@ -83,6 +84,24 @@ export default function VirementForm() {
   const montantNum = parseFloat(form.montant) || 0
   const estInhabituel = montantNum > 500
 
+  // ── Écouter les messages du Service Worker ────────────────────────────
+  useEffect(() => {
+    const unsubscribe = onVirementExpire((virement) => {
+      localStorage.removeItem('virement_en_cours')
+      setCompteEnVerification(true, {
+        id: virement.id,
+        beneficiaire: virement.beneficiaire,
+        montant: virement.montant,
+        motif: virement.motif,
+        dateEnvoi: virement.dateEnvoi,
+        dateCreditPrevue: virement.dateEnvoi + 48 * 60 * 60 * 1000,
+      })
+      stopVirementWorker()
+    })
+
+    return unsubscribe
+  }, [setCompteEnVerification])
+
   // ── Restauration du timer depuis localStorage au montage ──────────────
   useEffect(() => {
     const stored = localStorage.getItem('virement_en_cours')
@@ -92,16 +111,16 @@ export default function VirementForm() {
     const dateCreditPrevue = virement.dateEnvoi + 48 * 60 * 60 * 1000
 
     if (Date.now() >= dateCreditPrevue) {
-      // Les 48h sont déjà écoulées → déclencher immédiatement
       localStorage.removeItem('virement_en_cours')
       setCompteEnVerification(true, {
         id: virement.id,
         beneficiaire: virement.beneficiaire,
         montant: virement.montant,
         motif: virement.motif,
+        dateEnvoi: virement.dateEnvoi,
+        dateCreditPrevue: dateCreditPrevue,
       })
     } else {
-      // Timer encore actif → restaurer l'état succes
       setForm({
         beneficiaire: virement.beneficiaire,
         iban: '',
@@ -111,6 +130,15 @@ export default function VirementForm() {
       setReference(virement.id)
       setDateEnvoi(virement.dateEnvoi)
       setEtape('succes')
+
+      // Relancer la surveillance en arrière-plan
+      startVirementWorker({
+        id: virement.id,
+        beneficiaire: virement.beneficiaire,
+        montant: virement.montant,
+        motif: virement.motif,
+        dateEnvoi: virement.dateEnvoi,
+      })
     }
   }, [setCompteEnVerification])
 
@@ -168,7 +196,6 @@ export default function VirementForm() {
       dateCreditPrevue: maintenant + 48 * 60 * 60 * 1000,
     })
 
-    // Sauvegarder dans localStorage pour survie au rechargement
     localStorage.setItem(
       'virement_en_cours',
       JSON.stringify({
@@ -179,6 +206,15 @@ export default function VirementForm() {
         dateEnvoi: maintenant,
       })
     )
+
+    // Démarrer la surveillance en arrière-plan (Service Worker)
+    await startVirementWorker({
+      id: ref,
+      beneficiaire: form.beneficiaire,
+      montant: montantNum,
+      motif: form.motif,
+      dateEnvoi: maintenant,
+    })
 
     if (estInhabituel) {
       setAlerteSecurite({
@@ -194,14 +230,18 @@ export default function VirementForm() {
     setLoading(false)
   }
 
-  // Appelé par Compte48h quand le timer atteint zéro
+  // Appelé par Compte48h quand le timer atteint zéro (page ouverte)
   function handleExpiration() {
+    const dateCreditPrevue = dateEnvoi + 48 * 60 * 60 * 1000
     localStorage.removeItem('virement_en_cours')
+    stopVirementWorker()
     setCompteEnVerification(true, {
       id: reference,
       beneficiaire: form.beneficiaire,
       montant: montantNum,
       motif: form.motif,
+      dateEnvoi: dateEnvoi,
+      dateCreditPrevue: dateCreditPrevue,
     })
   }
 
@@ -255,6 +295,7 @@ export default function VirementForm() {
           style={{ backgroundColor: '#1F3A8A' }}
           onClick={() => {
             localStorage.removeItem('virement_en_cours')
+            stopVirementWorker()
             setEtape('formulaire')
             setForm({ beneficiaire: '', iban: '', montant: '', motif: '' })
             setCode2fa('')

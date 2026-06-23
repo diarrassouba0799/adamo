@@ -29,10 +29,15 @@ export default function MobileNav() {
               href={href}
               className={cn(
                 'flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors',
-                active ? 'text-[#003189]' : 'text-gray-400'
+                active
+                  ? 'text-[#003189]'
+                  : 'text-gray-400 hover:text-[#003189]'
               )}
             >
-              <Icon size={20} />
+              <Icon
+                size={20}
+                className={active ? 'text-[#003189]' : 'text-[#7a8bbd]'}
+              />
               {label}
             </Link>
           )
