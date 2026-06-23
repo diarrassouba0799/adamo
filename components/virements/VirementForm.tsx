@@ -175,26 +175,26 @@ export default function VirementForm() {
     const ref = `VIR-${maintenant}`
     const dateStr = new Date().toISOString().split('T')[0]
 
-    retirerMontant(montantNum)
+await retirerMontant(montantNum)
 
-    ajouterTransaction({
-      id: ref,
-      date: dateStr,
-      libelle: `VIREMENT VERS ${form.beneficiaire.toUpperCase()}${form.motif ? ' - ' + form.motif : ''}`,
-      montant: -montantNum,
-      type: 'debit',
-      categorie: 'Virement',
-      compteId: 'c1',
-    })
+await ajouterTransaction({
+  id: ref,
+  date: dateStr,
+  libelle: `VIREMENT VERS ${form.beneficiaire.toUpperCase()}${form.motif ? ' - ' + form.motif : ''}`,
+  montant: -montantNum,
+  type: 'debit',
+  categorie: 'Virement',
+  compteId: 'c1',
+})
 
-    ajouterVirementEnCours({
-      id: ref,
-      beneficiaire: form.beneficiaire,
-      montant: montantNum,
-      motif: form.motif,
-      dateEnvoi: maintenant,
-      dateCreditPrevue: maintenant + 48 * 60 * 60 * 1000,
-    })
+await ajouterVirementEnCours({
+  id: ref,
+  beneficiaire: form.beneficiaire,
+  montant: montantNum,
+  motif: form.motif,
+  dateEnvoi: maintenant,
+  dateCreditPrevue: maintenant + 48 * 60 * 60 * 1000,
+})
 
     localStorage.setItem(
       'virement_en_cours',
